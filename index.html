@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#f6f7f0">
+    <meta name="description" content="사진과 한 줄로 남기는 나의 식물 성장 일기">
+    <title>초록일기 — 나의 식물 기록</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="초록일기 홈">
+          <span class="brand-icon" aria-hidden="true">芽</span>
+          <span>초록일기</span>
+        </a>
+        <span class="today-label" id="today-label"></span>
+      </header>
+
+      <main>
+        <section class="home-view" id="home-view">
+          <div class="welcome">
+            <div>
+              <p class="eyebrow">MY LITTLE GARDEN</p>
+              <h1>작은 새싹과 함께<br>오늘도 레벨 업!</h1>
+              <p class="welcome-copy">나만의 정원 · 하루 한 장 성장 퀘스트</p>
+            </div>
+            <div class="welcome-plant" aria-hidden="true"><span class="pixel-sprout"></span></div>
+          </div>
+
+          <section class="garden-status" id="garden-status" aria-label="식물 성장 상태와 오늘의 서울 날씨" hidden>
+            <div class="status-heading">
+              <div><p class="eyebrow">GARDEN QUEST</p><h2>우리 집 초록이</h2></div>
+              <span class="pixel-tag">SEOUL · TODAY</span>
+            </div>
+            <div class="plant-day-list" id="plant-day-list"></div>
+            <div class="weather-card" id="weather-card" aria-live="polite">
+              <span class="weather-icon" id="weather-icon" aria-hidden="true">◌</span>
+              <div class="weather-copy"><strong id="weather-summary">서울 날씨 확인 중...</strong><span id="weather-details">오늘 날씨에 맞는 돌봄 팁을 준비하고 있어요.</span></div>
+              <button class="weather-refresh" id="weather-refresh" type="button" aria-label="서울 날씨 새로고침">↻</button>
+            </div>
+            <p class="weather-source">서울 야외 날씨 기준 · <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a> · 실내 흙 상태를 먼저 확인해요</p>
+          </section>
+
+          <section class="record-panel" aria-labelledby="record-title">
+            <div class="section-title">
+              <div>
+                <p class="eyebrow">GROWING NOTE</p>
+                <h2 id="record-title">오늘의 기록</h2>
+              </div>
+              <span class="soft-label" id="record-weather-tag">GROW · SAVE · REPEAT</span>
+            </div>
+            <div class="daily-guidance" id="daily-guidance" hidden>
+              <div class="guidance-title"><span aria-hidden="true">✦</span><strong>오늘의 식물 팁</strong><span id="guidance-stage"></span></div>
+              <ul id="guidance-list"></ul>
+              <p class="guidance-note">키를 재지 않아도 괜찮아요. 눈에 보이는 변화를 고르면 팁에 반영해요. 바쁜 날은 사진이나 한마디만 남겨도 돼요.</p>
+            </div>
+
+            <div class="empty-state" id="no-plants-message" hidden>
+              <span aria-hidden="true">🪴</span>
+              <strong>아직 등록한 식물이 없어요</strong>
+              <p>먼저 키우고 있는 식물을 등록해 주세요.</p>
+              <button class="button button-primary" type="button" data-open-plant-form>식물 등록하기</button>
+            </div>
+
+            <form id="entry-form" class="entry-form" hidden>
+              <div class="photo-picker" id="photo-picker">
+                <img id="photo-preview" alt="선택한 식물 사진 미리보기" hidden>
+                <label class="photo-prompt" id="photo-prompt" for="photo-input">
+                  <span class="camera-icon" aria-hidden="true">＋</span>
+                  <strong>식물 사진 찍기</strong>
+                  <span>눌러서 카메라를 열거나 사진을 골라요</span>
+                </label>
+                <button class="photo-remove" id="remove-photo" type="button" aria-label="사진 제거" hidden>×</button>
+                <input id="photo-input" type="file" accept="image/*" capture="environment">
+              </div>
+
+              <div class="form-row">
+                <label class="field-label" for="entry-plant">어떤 식물인가요?</label>
+                <select id="entry-plant" required></select>
+              </div>
+              <div class="form-row">
+                <label class="field-label" for="entry-date">기록 날짜</label>
+                <input id="entry-date" type="date" required>
+              </div>
+              <div class="form-row">
+                <label class="field-label" for="entry-observation">오늘 어떤 변화가 있나요? <span>선택 · 측정 없이</span></label>
+                <select id="entry-observation">
+                  <option value="">오늘은 건너뛸게요</option>
+                  <option value="sprout">새싹이 올라왔어요</option>
+                  <option value="leaves">새잎이 났어요</option>
+                  <option value="flower">꽃이 피었어요</option>
+                  <option value="fruit">열매가 생겼어요</option>
+                  <option value="same">아직 비슷해요</option>
+                  <option value="wilting">잎이 처지거나 노래졌어요</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label class="field-label" for="entry-note">오늘의 한마디 <span>선택</span></label>
+                <textarea id="entry-note" maxlength="120" rows="2" placeholder="새잎이 하나 더 났다!"></textarea>
+              </div>
+              <div class="form-actions">
+                <span class="privacy-hint">사진과 기록은 이 기기에 저장돼요.</span>
+                <button class="button button-primary" type="submit">기록 남기기</button>
+              </div>
+              <p class="form-message" id="entry-message" role="status" aria-live="polite"></p>
+            </form>
+          </section>
+
+          <section class="journal-panel" aria-labelledby="journal-title">
+            <div class="journal-heading">
+              <div>
+                <p class="eyebrow">MY JOURNAL</p>
+                <h2 id="journal-title">식물 일기</h2>
+              </div>
+              <div class="view-switch" role="group" aria-label="일기 보기 방식">
+                <button class="view-button is-active" type="button" data-view="diary" aria-pressed="true">일기</button>
+                <button class="view-button" type="button" data-view="calendar" aria-pressed="false">달력</button>
+              </div>
+            </div>
+
+            <div class="diary-view" id="diary-view">
+              <div class="entry-list" id="entry-list"></div>
+              <p class="journal-empty" id="journal-empty">아직 기록이 없어요. 오늘의 초록을 첫 장으로 남겨볼까요?</p>
+            </div>
+
+            <div class="calendar-view" id="calendar-view" hidden>
+              <div class="calendar-heading">
+                <button class="month-button" id="previous-month" type="button" aria-label="이전 달">‹</button>
+                <h3 id="calendar-month"></h3>
+                <button class="month-button" id="next-month" type="button" aria-label="다음 달">›</button>
+              </div>
+              <div class="calendar-grid calendar-weekdays" aria-hidden="true">
+                <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+              </div>
+              <div class="calendar-grid" id="calendar-days"></div>
+              <div class="selected-day-records" id="selected-day-records"></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="plants-view" id="plants-view" hidden>
+          <div class="page-heading">
+            <p class="eyebrow">MY LITTLE GARDEN</p>
+            <h1>나의 식물</h1>
+            <p>이름을 지어주고, 자라는 날들을 모아봐요.</p>
+          </div>
+          <div class="plant-list" id="plant-list"></div>
+          <button class="button button-primary add-plant-button" type="button" data-open-plant-form>＋ 새 식물 등록</button>
+          <section class="tips-panel" id="tips-panel">
+            <p class="eyebrow">GROWING TIP</p>
+            <h2>식물 키우기 팁</h2>
+            <p class="tips-intro">식물을 등록하면 그 친구에게 맞는 팁을 볼 수 있어요.</p>
+            <div id="plant-tips"></div>
+          </section>
+        </section>
+      </main>
+
+      <nav class="bottom-nav" aria-label="주요 메뉴">
+        <button class="nav-button is-active" type="button" data-page="home">
+          <span aria-hidden="true">▤</span><span>기록</span>
+        </button>
+        <button class="nav-button" type="button" data-page="plants">
+          <span aria-hidden="true">♧</span><span>내 식물</span>
+        </button>
+      </nav>
+    </div>
+
+    <dialog class="plant-dialog" id="plant-dialog">
+      <form id="plant-form" method="dialog">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">A NEW LITTLE FRIEND</p>
+            <h2>새 식물 만나기</h2>
+          </div>
+          <button class="dialog-close" type="button" id="close-dialog" aria-label="닫기">×</button>
+        </div>
+        <label class="field-label" for="catalog-plant">어떤 식물을 키우나요?</label>
+        <select id="catalog-plant" required></select>
+        <label class="field-label" for="plant-nickname">내가 지어주는 이름 <span>선택</span></label>
+        <input id="plant-nickname" type="text" maxlength="24" placeholder="예: 방울이">
+        <label class="field-label" for="plant-start-date">심은 날짜</label>
+        <input id="plant-start-date" type="date" required>
+        <p class="dialog-tip" id="dialog-tip"></p>
+        <p class="form-message" id="plant-message" role="status" aria-live="polite"></p>
+        <button class="button button-primary dialog-submit" type="submit">내 식물로 등록</button>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
