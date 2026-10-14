@@ -46,6 +46,26 @@ assert.match(vm.runInContext('careTips(state.plants[0]).join()', context), /마�
 vm.runInContext("weather = { temp: 8, humidity: 80, wind: 5, code: 61, rain: 4 };", context);
 assert.match(vm.runInContext('careTips(state.plants[0]).join()', context), /과습/);
 assert.match(vm.runInContext('careTips(state.plants[0]).join()', context), /찬바람/);
+vm.runInContext("state.entries[0].id = 'first'; state.entries[1].id = 'second'; renderAll();", context);
+assert.match(element('#entry-list').innerHTML, /data-remove-entry="first"/);
+assert.match(element('#selected-day-records').innerHTML, /data-remove-entry="first"/);
+const deleteEvent = { target: { closest: () => ({ dataset: { removeEntry: 'first' } }) } };
+context.window.confirm = () => false;
+element('#entry-list').listeners.click(deleteEvent);
+assert.equal(vm.runInContext('state.entries.length', context), 2, 'Cancel preserves records');
+let storedState;
+context.localStorage.setItem = (key, value) => { storedState = JSON.parse(value); };
+context.window.confirm = () => true;
+element('#selected-day-records').listeners.click(deleteEvent);
+assert.equal(storedState.entries.length, 1, 'Deletion persisted');
+assert.equal(storedState.entries[0].id, 'second', 'Other record preserved');
+assert.doesNotMatch(element('#entry-list').innerHTML, /data-remove-entry="first"/);
+assert.doesNotMatch(element('#selected-day-records').innerHTML, /data-remove-entry="first"/);
+deleteEvent.target.closest = () => ({ dataset: { removeEntry: 'second' } });
+element('#entry-list').listeners.click(deleteEvent);
+assert.equal(storedState.entries.length, 0);
+assert.equal(element('#journal-empty').hidden, false, 'Empty state restored');
+assert.doesNotMatch(element('#calendar-days').innerHTML, /has-entry/);
 setImmediate(() => {
   assert.match(element('#weather-summary').textContent, /불러오지 못/);
   console.log('PASS: plant selection, D+ dates, optional observations, observation tips, switching plants, weather tips and offline fallback');

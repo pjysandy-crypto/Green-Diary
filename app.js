@@ -136,6 +136,7 @@ function renderEntryCard(entry) {
       <div class="entry-meta"><strong>${escapeHtml(plant ? plantName(plant) : "등록한 식물")}</strong><span>·</span><time>${escapeHtml(dateLabel(entry.date, { month: "long", day: "numeric" }))}</time></div>
       <p>${escapeHtml(entry.note || "오늘의 모습을 사진으로 남겼어요.")}</p>
       <small>${plant ? escapeHtml(dayBadge(plant, entry.date)) : ""}${observations[entry.observation] ? ` · ${escapeHtml(observations[entry.observation].label)}` : Number.isFinite(entry.height) ? ` · 키 ${entry.height} cm` : ""}</small>
+      <button class="remove-entry" type="button" data-remove-entry="${escapeHtml(entry.id)}" aria-label="${escapeHtml(dateLabel(entry.date))} 기록 삭제">삭제</button>
     </div>
   </article>`;
 }
@@ -428,6 +429,23 @@ ui.plantList.addEventListener("click", (event) => {
   if (!saveState()) state = previousState;
   renderAll();
 });
+
+function removeEntry(event) {
+  const button = event.target.closest("[data-remove-entry]");
+  if (!button) return;
+  const entry = state.entries.find((item) => item.id === button.dataset.removeEntry);
+  if (!entry || !window.confirm("이 기록을 삭제할까요? 사진과 메모도 함께 삭제됩니다.")) return;
+  const previousEntries = state.entries;
+  state.entries = state.entries.filter((item) => item.id !== entry.id);
+  if (!saveState()) {
+    state.entries = previousEntries;
+    return;
+  }
+  ui.entryMessage.textContent = "기록을 삭제했어요.";
+  renderAll();
+}
+ui.entryList.addEventListener("click", removeEntry);
+ui.selectedDayRecords.addEventListener("click", removeEntry);
 
 ui.photoInput.addEventListener("change", async () => {
   const file = ui.photoInput.files?.[0];
